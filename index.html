@@ -198,8 +198,7 @@ const createScene = function () {
 
             // 水面用メッシュの処理
             const waterMaterial = new BABYLON.WaterMaterial("waterMaterial", scene);
-            // waterMaterial.bumpTexture = new BABYLON.Texture("./textures/waterbump.png", scene);
-            waterMaterial.bumpTexture = new BABYLON.Texture(BASE_URL3 + "/textures/waterbump.png", scene);
+            waterMaterial.bumpTexture = new BABYLON.Texture("textures/waterbump.png", scene);
             waterMaterial.windForce = 5;
             waterMaterial.waveHeight = 0.2;
             waterMaterial.bumpHeight = 0.1;
