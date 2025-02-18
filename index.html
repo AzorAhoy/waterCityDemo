@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
+        <script src="https://cdn.babylonjs.com/recast.js"></script>
+        <script src="https://cdn.babylonjs.com/ammo.js"></script>
+        <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
+        <script src="https://cdn.babylonjs.com/cannon.js"></script>
+        <script src="https://cdn.babylonjs.com/Oimo.js"></script>
+        <script src="https://cdn.babylonjs.com/earcut.min.js"></script>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://cdn.babylonjs.com/addons/babylonjs.addons.min.js"></script>
+        <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+        <style>
+            html,
+            body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+
+            #canvasZone {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+        <script>
+                    var canvas = document.getElementById("renderCanvas");
+
+                    var startRenderLoop = function (engine, canvas) {
+                        engine.runRenderLoop(function () {
+                            if (sceneToRender && sceneToRender.activeCamera) {
+                                sceneToRender.render();
+                            }
+                        });
+                    }
+
+                    var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+        const BASE_URL = "https://cx20.github.io/gltf-test";
+const BASE_URL2 = "https://rawcdn.githack.com/cx20/jsdo-static-contents/8df18b4c4a09f4c9f2d203566c7b553577407b76";
+
+const createScene = function () {
+    const scene = new BABYLON.Scene(engine);
+
+    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI * 4 / 3, 1.5, 50, BABYLON.Vector3.Zero(), scene);
+    camera.setTarget(BABYLON.Vector3.Zero());
+    camera.attachControl(canvas, true);
+    
+    // Skybox
+    const skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
+    const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+    skyboxMaterial.backFaceCulling = false;
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skybox.material = skyboxMaterial;
+
+    // 照明設定
+    const light0 = new BABYLON.HemisphericLight("light0", new BABYLON.Vector3(0, 1, 0), scene);
+    light0.intensity = 1.5;
+    light0.groundColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+
+    const light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(-1, -2, 1), scene);
+    light1.intensity = 1.2;
+
+    scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+    scene.clearColor = new BABYLON.Color4(0.1, 0.2, 0.3, 1); // より水っぽい空の色に
+
+    // ガラス用のカラーパレット
+    const colors = [
+        new BABYLON.Color3(0.95, 0.4, 0.4),   // 赤みがかったガラス
+        new BABYLON.Color3(0.4, 0.95, 0.4),   // 緑みがかったガラス
+        new BABYLON.Color3(0.4, 0.4, 0.95),   // 青みがかったガラス
+        new BABYLON.Color3(0.95, 0.95, 0.4),  // 黄色みがかったガラス
+        new BABYLON.Color3(0.95, 0.4, 0.95),  // 紫がかったガラス
+        new BABYLON.Color3(0.4, 0.95, 0.95),  // 水色がかったガラス
+        new BABYLON.Color3(0.7, 0.7, 0.9),    // 青白いガラス
+        new BABYLON.Color3(0.9, 0.7, 0.5)     // アンバーがかったガラス
+    ];
+
+    // ドーム用のノード（非表示にするもの）
+    const domeNodes = [
+        "node19_primitive0",
+        "node19_primitive1",
+        "node19_primitive2",
+        "node19_primitive3",
+        "node19_primitive4",
+        "node19_primitive5",
+        "node19_primitive6",
+        "node19_primitive7"
+    ];
+
+    const buildingNodes = [
+        "node20", "node21", "node22", "node23", "node24", "node25", "node26", "node30",
+        "node31", "node32", "node33", "node52", "node53", "node54", "node55",
+        "node56", "node57", "node58", "node59", "node60", "node61", "node62",
+        "node63", "node64", "node65", "node66",
+        "node107", "node175", "node176", "node177",
+        "node178", "node179", "node186", "node188", "node189", "node191", "node219",
+        "node220", "node222", "node223", "node224", "node225", "node227", "node228",
+        "node229", "node230", "node231", "node232", "node233",
+        "node187_primitive0", "node187_primitive1",
+        "node192_primitive0", "node192_primitive1",
+        "node226_primitive0", "node226_primitive1",
+        "node109", "node194", "node196", "node198", "node200", "node202", "node204",
+        "node216", "node218",
+        "node180", "node190"
+    ];
+
+    // Water Material用のノード
+    const waterNodes = ["node221"];
+
+    // 水面の作成
+    const waterPlane = BABYLON.MeshBuilder.CreateGround("waterPlane", {
+        width: 2000,
+        height: 2000,
+        subdivisions: 32
+    }, scene);
+    waterPlane.position.y = -2; // 少し下げて配置
+
+    Promise.all([
+        BABYLON.SceneLoader.ImportMeshAsync(null, BASE_URL2 + "/models/gltf/2.0/VC-fixed/glTF-Binary/", "VC-fixed.glb", scene).then(function (result) {
+            // ドーム部分の非表示化
+            const domeMeshes = result.meshes.filter(mesh => domeNodes.includes(mesh.name));
+            domeMeshes.forEach(mesh => {
+                mesh.visibility = 0; // メッシュを非表示に
+            });
+
+            // 元の床を非表示に
+            const floorMesh = result.meshes.find(mesh => mesh.name === "node221");
+            if (floorMesh) {
+                floorMesh.visibility = 0;
+            }
+
+            // 通常の建物用メッシュの処理
+            const meshes = result.meshes.filter(mesh => buildingNodes.includes(mesh.name));
+            meshes.forEach(mesh => {
+                if (mesh.material) {
+                    const originalMaterial = mesh.material;
+                    const pbrMaterial = new BABYLON.PBRMaterial(mesh.name + "_glass", scene);
+
+                    pbrMaterial.transparencyMode = BABYLON.PBRMaterial.PBRMATERIAL_TRANSPARENT;
+                    pbrMaterial.alpha = 0.6;
+                    pbrMaterial.metallic = 0.2;
+                    pbrMaterial.roughness = 0.1;
+                    
+                    pbrMaterial.indexOfRefraction = 1.5;
+                    pbrMaterial.environmentIntensity = 1.2;
+                    pbrMaterial.reflectionColor = new BABYLON.Color3(0.9, 0.9, 0.9);
+                    
+                    pbrMaterial.subSurface.isRefractionEnabled = true;
+                    pbrMaterial.subSurface.refractionIntensity = 0.9;
+                    
+                    if (originalMaterial.albedoTexture) {
+                        pbrMaterial.albedoTexture = originalMaterial.albedoTexture;
+                        pbrMaterial.useAlbedoAsGlassOpacity = true;
+                    }
+
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    pbrMaterial.albedoColor = color;
+                    
+                    pbrMaterial.clearCoat.isEnabled = true;
+                    pbrMaterial.clearCoat.intensity = 1.0;
+                    pbrMaterial.clearCoat.roughness = 0.01;
+
+                    mesh.material = pbrMaterial;
+                }
+            });
+
+            // 水面用メッシュの処理
+            const waterMaterial = new BABYLON.WaterMaterial("waterMaterial", scene);
+            waterMaterial.bumpTexture = new BABYLON.Texture("/textures/waterbump.png", scene);
+            waterMaterial.windForce = 5;
+            waterMaterial.waveHeight = 0.2;
+            waterMaterial.bumpHeight = 0.1;
+            waterMaterial.waveLength = 0.1;
+            waterMaterial.colorBlendFactor = 0.2;
+            waterMaterial.waterColor = new BABYLON.Color3(0.1, 0.3, 0.5);
+            
+            // 環境反射の設定
+            waterMaterial.addToRenderList(skybox);
+            result.meshes.forEach(m => {
+                if (buildingNodes.includes(m.name)) {
+                    waterMaterial.addToRenderList(m);
+                }
+            });
+
+            // 新しい水面に適用
+            waterPlane.material = waterMaterial;
+        }),
+    ]);
+
+    // アニメーションのための更新
+    scene.onBeforeRenderObservable.add(() => {
+       scene.activeCamera.alpha += 0.005 * scene.getAnimationRatio();
+    });
+
+    return scene;
+};
+                window.initFunction = async function() {
+                    
+                    
+                    
+                    var asyncEngineCreation = async function() {
+                        try {
+                        return createDefaultEngine();
+                        } catch(e) {
+                        console.log("the available createEngine function failed. Creating the default engine instead");
+                        return createDefaultEngine();
+                        }
+                    }
+
+                    window.engine = await asyncEngineCreation();
+        if (!engine) throw 'engine should not be null.';
+        startRenderLoop(engine, canvas);
+        window.scene = createScene();};
+        initFunction().then(() => {sceneToRender = scene
+                    });
+
+                    // Resize
+                    window.addEventListener("resize", function () {
+                        engine.resize();
+                    });
+        </script>
+    </body>
+</html>
