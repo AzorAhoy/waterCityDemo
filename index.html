@@ -64,7 +64,8 @@
         var sceneToRender = null;
         var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
         const BASE_URL = "https://cx20.github.io/gltf-test";
-const BASE_URL2 = "https://rawcdn.githack.com/cx20/jsdo-static-contents/8df18b4c4a09f4c9f2d203566c7b553577407b76";
+        const BASE_URL2 = "https://rawcdn.githack.com/cx20/jsdo-static-contents/8df18b4c4a09f4c9f2d203566c7b553577407b76";
+        const BASE_URL3 = "https://raw.githubusercontent.com/AzorAhoy/waterCityDemo/d7ee0588aeb7608f7ed89e04f91c6bd49a76f130";
 
 const createScene = function () {
     const scene = new BABYLON.Scene(engine);
@@ -197,7 +198,8 @@ const createScene = function () {
 
             // 水面用メッシュの処理
             const waterMaterial = new BABYLON.WaterMaterial("waterMaterial", scene);
-            waterMaterial.bumpTexture = new BABYLON.Texture("/textures/waterbump.png", scene);
+            // waterMaterial.bumpTexture = new BABYLON.Texture("./textures/waterbump.png", scene);
+            waterMaterial.bumpTexture = new BABYLON.Texture(BASE_URL3 + "/textures/waterbump.png", scene);
             waterMaterial.windForce = 5;
             waterMaterial.waveHeight = 0.2;
             waterMaterial.bumpHeight = 0.1;
